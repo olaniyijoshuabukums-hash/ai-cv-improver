@@ -5,7 +5,6 @@ import CVUploader from "@/components/CVUploader";
 import JobDescriptionInput, { JobDetails } from "@/components/JobDescriptionInput";
 import CVImprovementPanel from "@/components/CVImprovementPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParsedCV, ImprovedCV } from "@/types";
 import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
@@ -101,14 +100,15 @@ export default function ImprovePage() {
 
       {/* Results */}
       {improvedCV && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Improved CV</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CVImprovementPanel improvedCV={improvedCV} />
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">Your Improved CV</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Bullet points rewritten with action verbs and impact. Download below.
+            </p>
+          </div>
+          <CVImprovementPanel improvedCV={improvedCV} />
+        </div>
       )}
     </div>
   );

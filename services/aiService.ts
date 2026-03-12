@@ -49,19 +49,19 @@ export async function improveCV(bullet: string, jobContext?: string): Promise<{
     : "";
 
   const result = await generateCompletion({
-    systemPrompt: `You are an expert CV writer and career coach. Your job is to rewrite CV bullet points to be more impactful, concise, and achievement-focused. Always respond with valid JSON.`,
-    userPrompt: `Rewrite the following CV bullet point.
+    systemPrompt: `You are a senior CV writer and career coach who specialises in writing high-impact, achievement-focused bullet points. Always respond with valid JSON.`,
+    userPrompt: `Rewrite the following CV bullet point to be more impactful and professional.
 
 Rules:
-- Use strong action verbs
-- Highlight measurable impact where possible
-- Improve clarity and specificity
-- Limit to 30 words
-- Do not invent metrics — only use realistic improvements${contextNote}
+- MUST start with a strong past-tense action verb (e.g. "Designed", "Led", "Delivered", "Built", "Managed", "Launched", "Reduced", "Increased", "Produced", "Coordinated", "Developed", "Implemented", "Streamlined", "Generated")
+- Add measurable impact where plausible — use realistic numbers, sizes, or timeframes (e.g. "50+ clients", "team of 6", "within 2 weeks"). Do NOT invent specific percentages or revenue figures.
+- Improve specificity and clarity
+- Keep to 20–30 words
+- Do not start with "I" or use first person${contextNote}
 
 Bullet: "${bullet}"
 
-Respond with JSON: { "improved": "...", "reason": "..." }`,
+Respond with JSON: { "improved": "...", "reason": "one sentence explaining the key improvement" }`,
     maxTokens: 300,
   });
 
