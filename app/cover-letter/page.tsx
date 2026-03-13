@@ -94,17 +94,41 @@ export default function CoverLetterPage() {
         </Card>
       </div>
 
+      {/* Loading state */}
+      {isGenerating && !coverLetter && (
+        <div className="bg-white rounded-xl border border-border shadow-sm px-10 py-12 max-w-2xl space-y-4">
+          <p className="text-sm font-medium text-muted-foreground animate-pulse">
+            Generating your cover letter…
+          </p>
+          <div className="space-y-3 animate-pulse">
+            <div className="h-3 bg-muted rounded w-full" />
+            <div className="h-3 bg-muted rounded w-5/6" />
+            <div className="h-3 bg-muted rounded w-4/5" />
+            <div className="h-3 bg-muted rounded w-full mt-4" />
+            <div className="h-3 bg-muted rounded w-3/4" />
+            <div className="h-3 bg-muted rounded w-5/6" />
+            <div className="h-3 bg-muted rounded w-full mt-4" />
+            <div className="h-3 bg-muted rounded w-4/6" />
+            <div className="h-3 bg-muted rounded w-5/6" />
+          </div>
+        </div>
+      )}
+
       {/* Result */}
       {coverLetter && (
-        <Card>
-          <CardContent className="pt-6">
-            <CoverLetterPanel
-              coverLetter={coverLetter}
-              onRegenerate={handleRegenerate}
-              isRegenerating={isGenerating}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">Your Cover Letter</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Download, copy, or regenerate below.
+            </p>
+          </div>
+          <CoverLetterPanel
+            coverLetter={coverLetter}
+            onRegenerate={handleRegenerate}
+            isRegenerating={isGenerating}
+          />
+        </div>
       )}
     </div>
   );

@@ -7,12 +7,9 @@ export async function POST(req: NextRequest) {
     const body: GenerateCoverLetterRequest = await req.json();
     const { cvText, jobDescription, jobTitle, companyName } = body;
 
-    if (!cvText || !jobDescription || !jobTitle || !companyName) {
+    if (!cvText || !jobDescription) {
       return NextResponse.json(
-        {
-          error:
-            "All fields are required: cvText, jobDescription, jobTitle, companyName",
-        },
+        { error: "cvText and jobDescription are required" },
         { status: 400 }
       );
     }
