@@ -30,7 +30,8 @@ export async function generateCompletion(
 
   for (const block of response.content) {
     if (block.type === "text") {
-      return block.text;
+      // Strip markdown code fences the model sometimes wraps JSON in
+      return block.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
     }
   }
 
@@ -103,8 +104,8 @@ export async function generateCoverLetter(params: {
 
   const result = await generateCompletion({
     model: "claude-sonnet-4-6",
-    systemPrompt: `You are a professional cover letter writer who creates compelling, personalized cover letters. Always respond with valid JSON.`,
-    userPrompt: `Write a compelling, personalized cover letter for the candidate below.
+    systemPrompt: `You are a professional cover letter writer. Using the CV content provided and the job description, write a compelling, personalized cover letter. Format: opening paragraph (hook + role), body paragraph 1 (relevant experience), body paragraph 2 (skills match + enthusiasm), closing paragraph (CTA). Tone: professional but warm. Length: 3-4 paragraphs. Do not use generic phrases like "I am writing to apply". Always respond with valid JSON.`,
+    userPrompt: `Write a cover letter for the candidate below.
 
 Candidate CV:
 ${params.cvText}
@@ -112,17 +113,6 @@ ${params.cvText}
 ${jobContext}
 Job Description:
 ${params.jobDescription}
-
-Instructions:
-- Structure as exactly 4 paragraphs separated by blank lines:
-  1. Opening: a strong hook that names the role and shows genuine enthusiasm — do NOT start with "I am writing to apply" or any variation of it
-  2. Body paragraph 1: highlight the candidate's most relevant experience and achievements from their CV, connecting them directly to the role requirements
-  3. Body paragraph 2: match specific skills to the job description and convey authentic enthusiasm for the company/role
-  4. Closing: confident call to action expressing eagerness to discuss further
-- Tone: professional but warm — avoid stiff corporate language
-- Length: 250–350 words across the 4 paragraphs
-- Reference the company name naturally if provided
-- Do not repeat the CV verbatim — synthesize and connect experience to the role
 
 Respond with JSON: { "coverLetter": "..." }`,
     maxTokens: 2048,

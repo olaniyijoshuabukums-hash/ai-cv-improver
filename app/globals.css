@@ -127,4 +127,67 @@
   html {
     @apply font-sans;
   }
+
+  /* ── Global input / textarea base styles ── */
+  input,
+  textarea,
+  select {
+    background-color: #ffffff;
+    border-color: #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    color: #1a1a1a;
+    font-weight: 400;
+    /* Firefox: kill the default inner glow */
+    filter: none;
+    /* Prevent iOS from styling inputs */
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  /* ── Placeholder: light ghost text ── */
+  input::placeholder,
+  textarea::placeholder {
+    color: #b0b8c1;
+    font-weight: 400;
+    opacity: 1; /* Firefox reduces opacity by default */
+  }
+
+  /* ── Focus: brand green ring (beats browser defaults) ── */
+  input:focus,
+  input:focus-visible,
+  textarea:focus,
+  textarea:focus-visible,
+  select:focus,
+  select:focus-visible {
+    outline: none;
+    border-color: #1a7a4a !important;
+    box-shadow: 0 0 0 3px rgba(26, 122, 74, 0.15) !important;
+  }
+
+  /* ── Autofill: force white background, dark text ── */
+  /* Chrome / Safari — must use hex; oklch is not supported in these webkit props */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+    -webkit-text-fill-color: #1a1a1a !important;
+    caret-color: #1a1a1a !important;
+    /* Delay browser's background-color revert indefinitely */
+    transition: background-color 5000s ease-in-out 0s,
+                color 5000s ease-in-out 0s !important;
+  }
+
+  /* Autofill focus state: keep the green ring */
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px #ffffff inset,
+                        0 0 0 3px rgba(26, 122, 74, 0.15) !important;
+    border-color: #1a7a4a !important;
+  }
 }

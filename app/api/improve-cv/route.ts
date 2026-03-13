@@ -10,7 +10,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Parsed CV is required" }, { status: 400 });
     }
 
-    const improvedCV = await improveCV(body.parsedCV, body.jobDescription);
+    const improvedCV = await improveCV(
+      body.parsedCV,
+      body.jobTitle,
+      body.companyName,
+      body.jobDescription
+    );
 
     return NextResponse.json({ success: true, improvedCV });
   } catch (error) {

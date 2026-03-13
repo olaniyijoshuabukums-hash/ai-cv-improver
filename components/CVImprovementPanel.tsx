@@ -4,49 +4,16 @@ import { useState } from "react";
 import { ImprovedCV } from "@/types";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
-import { Download, FileText } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button-variants";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Download, FileText, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-function cvToText(cv: ImprovedCV): string {
-  const lines: string[] = [];
-
-  if (cv.name) lines.push(cv.name);
-  const contact = [cv.email, cv.phone].filter(Boolean).join("  |  ");
-  if (contact) lines.push(contact);
-  lines.push("");
-
-  if (cv.experience.length > 0) {
-    lines.push("EXPERIENCE");
-    lines.push("─".repeat(48));
-    for (const job of cv.experience) {
-      const roleHeader = [job.role, job.company].filter(Boolean).join(" — ");
-      lines.push(roleHeader);
-      if (job.duration) lines.push(job.duration);
-      for (const b of job.bullets) {
-        lines.push(`• ${b.improved}`);
-      }
-      lines.push("");
-    }
-  }
-
-  if (cv.skills.length > 0) {
-    lines.push("SKILLS");
-    lines.push("─".repeat(48));
-    lines.push(cv.skills.join(" · "));
-    lines.push("");
-  }
-
-  if (cv.education.length > 0) {
-    lines.push("EDUCATION");
-    lines.push("─".repeat(48));
-    for (const edu of cv.education) {
-      const eduLine = [edu.degree, edu.institution].filter(Boolean).join(" — ");
-      lines.push(edu.year ? `${eduLine} (${edu.year})` : eduLine);
-    }
-  }
-
-  return lines.join("\n");
-}
 
 interface CVImprovementPanelProps {
   improvedCV: ImprovedCV;
@@ -58,13 +25,8 @@ export default function CVImprovementPanel({ improvedCV }: CVImprovementPanelPro
   async function handleDownload(format: "pdf" | "docx") {
     setDownloading(format);
     try {
-      const content = cvToText(improvedCV);
       const name = improvedCV.name?.replace(/\s+/g, "_") ?? "CV";
-      const blob = await apiClient.exportDocument({
-        content,
-        format,
-        filename: `${name}_Improved`,
-      });
+      const blob = await apiClient.exportCV(improvedCV, format, `${name}_Improved`);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -79,77 +41,99 @@ export default function CVImprovementPanel({ improvedCV }: CVImprovementPanelPro
   }
 
   return (
-    <div className="space-y-6">
-      {/* Download buttons */}
-      <div className="flex flex-wrap gap-3">
-        <Button
-          onClick={() => handleDownload("pdf")}
-          disabled={!!downloading}
-          size="sm"
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" />
-          {downloading === "pdf" ? "Generating…" : "Download PDF"}
-        </Button>
-        <Button
-          onClick={() => handleDownload("docx")}
-          disabled={!!downloading}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <FileText className="h-4 w-4" />
-          {downloading === "docx" ? "Generating…" : "Download DOCX"}
-        </Button>
+    <div className="space-y-5">
+      {/* Sticky download bar */}
+      <div className="sticky top-[72px] z-10 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-background/95 px-4 py-3 backdrop-blur-sm shadow-sm">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(buttonVariants({ size: "sm" }), "gap-2")}
+            disabled={!!downloading}
+          >
+            <Download className="h-4 w-4" />
+            {downloading ? "Downloading…" : "Download"}
+            <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem
+              onClick={() => handleDownload("pdf")}
+              disabled={!!downloading}
+              className="gap-2 cursor-pointer"
+            >
+              <FileText className="h-4 w-4" />
+              Download as PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleDownload("docx")}
+              disabled={!!downloading}
+              className="gap-2 cursor-pointer"
+            >
+              <FileText className="h-4 w-4" />
+              Download as DOCX
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* A4-style CV document */}
       <div className="bg-white rounded-xl border border-border shadow-sm px-10 py-12 max-w-2xl font-sans">
 
-        {/* Header — name & contact */}
+        {/* ── Header ── */}
         {(improvedCV.name || improvedCV.email || improvedCV.phone) && (
-          <div className="mb-8 pb-6 border-b border-gray-200">
+          <div className="mb-7 pb-6 border-b border-gray-100">
             {improvedCV.name && (
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">
                 {improvedCV.name}
-              </h2>
+              </h1>
             )}
-            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-              {improvedCV.email && <span>{improvedCV.email}</span>}
-              {improvedCV.phone && <span>{improvedCV.phone}</span>}
-            </div>
+            {(improvedCV.email || improvedCV.phone) && (
+              <p className="text-sm text-gray-500">
+                {[improvedCV.email, improvedCV.phone].filter(Boolean).join("  |  ")}
+              </p>
+            )}
           </div>
         )}
 
-        {/* Experience */}
+        {/* ── Professional Summary ── */}
+        {improvedCV.summary && (
+          <section className="mb-7">
+            <SectionHeading>Professional Summary</SectionHeading>
+            <p className="text-sm text-gray-500 italic leading-relaxed mt-3">
+              {improvedCV.summary}
+            </p>
+          </section>
+        )}
+
+        {/* ── Experience ── */}
         {improvedCV.experience.length > 0 && (
-          <section className="mb-8">
-            <h3 className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-700 mb-4">
-              Experience
-            </h3>
-            <div className="space-y-6">
+          <section className="mb-7">
+            <SectionHeading>Experience</SectionHeading>
+            <div className="mt-3 space-y-6">
               {improvedCV.experience.map((job, i) => (
                 <div key={i}>
-                  <div className="flex items-baseline justify-between gap-4 mb-0.5">
+                  <div className="flex items-start justify-between gap-4 mb-0.5">
                     <p className="text-sm font-semibold text-gray-900">
-                      {job.role}
+                      {job.title}
                       {job.company && (
-                        <span className="font-normal text-gray-500">
-                          {" "}— {job.company}
-                        </span>
+                        <span className="font-normal text-gray-500"> — {job.company}</span>
+                      )}
+                      {job.location && (
+                        <span className="font-normal text-gray-400">, {job.location}</span>
                       )}
                     </p>
-                    {job.duration && (
-                      <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap">
-                        {job.duration}
+                    {job.period && (
+                      <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap mt-0.5">
+                        {job.period}
                       </span>
                     )}
                   </div>
                   <ul className="mt-2 space-y-1.5">
                     {job.bullets.map((bullet, j) => (
-                      <li key={j} className="flex gap-2.5 text-sm text-gray-700 leading-relaxed">
+                      <li
+                        key={j}
+                        className="flex gap-2.5 text-sm text-gray-700 leading-relaxed"
+                      >
                         <span className="text-emerald-600 shrink-0 mt-px select-none">•</span>
-                        <span>{bullet.improved}</span>
+                        <span>{bullet}</span>
                       </li>
                     ))}
                   </ul>
@@ -159,25 +143,28 @@ export default function CVImprovementPanel({ improvedCV }: CVImprovementPanelPro
           </section>
         )}
 
-        {/* Skills */}
+        {/* ── Skills ── */}
         {improvedCV.skills.length > 0 && (
-          <section className="mb-8">
-            <h3 className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-700 mb-3">
-              Skills
-            </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {improvedCV.skills.join(" · ")}
-            </p>
+          <section className="mb-7">
+            <SectionHeading>Skills</SectionHeading>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {improvedCV.skills.map((skill, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
           </section>
         )}
 
-        {/* Education */}
+        {/* ── Education ── */}
         {improvedCV.education.length > 0 && (
           <section>
-            <h3 className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-700 mb-3">
-              Education
-            </h3>
-            <div className="space-y-2">
+            <SectionHeading>Education</SectionHeading>
+            <div className="mt-3 space-y-2">
               {improvedCV.education.map((edu, i) => (
                 <div key={i} className="flex items-baseline justify-between gap-4">
                   <p className="text-sm text-gray-900">
@@ -195,6 +182,16 @@ export default function CVImprovementPanel({ improvedCV }: CVImprovementPanelPro
           </section>
         )}
       </div>
+    </div>
+  );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="border-b-2 border-emerald-600 pb-1">
+      <h3 className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-emerald-700">
+        {children}
+      </h3>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import {
   CVUploadResponse,
   ImproveCVRequest,
   ImproveCVResponse,
+  ImprovedCV,
   GenerateCoverLetterRequest,
   GenerateCoverLetterResponse,
   ParsedCV,
@@ -51,6 +52,23 @@ export const apiClient = {
     return handleResponse<GenerateCoverLetterResponse>(res);
   },
 
+  // Structured CV export
+  async exportCV(cv: ImprovedCV, format: "pdf" | "docx", filename: string): Promise<Blob> {
+    const res = await fetch("/api/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cv, format, filename }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ error: "Export failed" }));
+      throw new Error(error.error || "Export failed");
+    }
+
+    return res.blob();
+  },
+
+  // Plain text export (cover letter)
   async exportDocument(data: ExportRequest): Promise<Blob> {
     const res = await fetch("/api/export", {
       method: "POST",

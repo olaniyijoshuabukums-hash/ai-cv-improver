@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { CoverLetter } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Copy, Download, RefreshCw, Check } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button-variants";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Copy, Download, RefreshCw, Check, ChevronDown, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 
@@ -19,16 +27,20 @@ export default function CoverLetterPanel({
   isRegenerating = false,
 }: CoverLetterPanelProps) {
   const [copied, setCopied] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<"pdf" | "docx" | null>(null);
 
   const paragraphs = coverLetter.content
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean);
 
-  const wordCount = coverLetter.content
-    .split(/\s+/)
-    .filter(Boolean).length;
+  const wordCount = coverLetter.content.split(/\s+/).filter(Boolean).length;
+
+  const slug =
+    [coverLetter.jobTitle, coverLetter.companyName]
+      .filter(Boolean)
+      .join("-")
+      .replace(/\s+/g, "_") || "cover-letter";
 
   async function handleCopy() {
     try {
@@ -40,45 +52,62 @@ export default function CoverLetterPanel({
     }
   }
 
-  async function handleDownloadPDF() {
-    setDownloading(true);
+  async function handleDownload(format: "pdf" | "docx") {
+    setDownloading(format);
     try {
-      const slug = [coverLetter.jobTitle, coverLetter.companyName]
-        .filter(Boolean)
-        .join("-")
-        .replace(/\s+/g, "_") || "cover-letter";
       const blob = await apiClient.exportDocument({
         content: coverLetter.content,
-        format: "pdf",
+        format,
         filename: slug,
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${slug}.pdf`;
+      a.download = `${slug}.${format}`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Export failed");
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   }
 
   return (
     <div className="space-y-5">
-      {/* Action buttons */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          onClick={handleDownloadPDF}
-          disabled={downloading}
-          size="sm"
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" />
-          {downloading ? "Generating…" : "Download PDF"}
-        </Button>
+      {/* Sticky download bar */}
+      <div className="sticky top-[72px] z-10 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-background/95 px-4 py-3 backdrop-blur-sm shadow-sm">
+        {/* Download dropdown */}
+        <DropdownMenu>
+            <DropdownMenuTrigger
+            className={cn(buttonVariants({ size: "sm" }), "gap-2")}
+            disabled={!!downloading}
+          >
+            <Download className="h-4 w-4" />
+            {downloading ? "Downloading…" : "Download"}
+            <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem
+              onClick={() => handleDownload("pdf")}
+              disabled={!!downloading}
+              className="gap-2 cursor-pointer"
+            >
+              <FileText className="h-4 w-4" />
+              Download as PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleDownload("docx")}
+              disabled={!!downloading}
+              className="gap-2 cursor-pointer"
+            >
+              <FileText className="h-4 w-4" />
+              Download as DOCX
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
+        {/* Copy to clipboard */}
         <Button
           onClick={handleCopy}
           variant="outline"
@@ -93,6 +122,7 @@ export default function CoverLetterPanel({
           {copied ? "Copied!" : "Copy to Clipboard"}
         </Button>
 
+        {/* Regenerate */}
         {onRegenerate && (
           <Button
             onClick={onRegenerate}

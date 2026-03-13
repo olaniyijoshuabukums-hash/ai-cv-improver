@@ -22,10 +22,12 @@ export interface Education {
   year: string;
 }
 
-export interface ImprovedBullet {
-  original: string;
-  improved: string;
-  reason: string;
+export interface ImprovedWorkExperience {
+  title: string;
+  company: string;
+  location?: string;
+  period: string;
+  bullets: string[];
 }
 
 export interface ImprovedCV {
@@ -34,15 +36,8 @@ export interface ImprovedCV {
   phone?: string;
   summary?: string;
   experience: ImprovedWorkExperience[];
-  education: Education[];
   skills: string[];
-}
-
-export interface ImprovedWorkExperience {
-  role: string;
-  company: string;
-  duration: string;
-  bullets: ImprovedBullet[];
+  education: Education[];
 }
 
 export interface JobAnalysis {
@@ -67,6 +62,8 @@ export interface CVUploadResponse {
 
 export interface ImproveCVRequest {
   parsedCV: ParsedCV;
+  jobTitle?: string;
+  companyName?: string;
   jobDescription?: string;
 }
 
@@ -79,8 +76,8 @@ export interface ImproveCVResponse {
 export interface GenerateCoverLetterRequest {
   cvText: string;
   jobDescription: string;
-  jobTitle: string;
-  companyName: string;
+  jobTitle?: string;
+  companyName?: string;
 }
 
 export interface GenerateCoverLetterResponse {
@@ -89,8 +86,16 @@ export interface GenerateCoverLetterResponse {
   error?: string;
 }
 
+// Used by cover letter export (plain text content)
 export interface ExportRequest {
   content: string;
+  format: "pdf" | "docx";
+  filename: string;
+}
+
+// Used by CV export (structured JSON)
+export interface CVExportRequest {
+  cv: ImprovedCV;
   format: "pdf" | "docx";
   filename: string;
 }

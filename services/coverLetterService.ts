@@ -4,14 +4,19 @@ import { generateCoverLetter } from "./aiService";
 export async function createCoverLetter(params: {
   cvText: string;
   jobDescription: string;
-  jobTitle: string;
-  companyName: string;
+  jobTitle?: string;
+  companyName?: string;
 }): Promise<CoverLetter> {
-  const content = await generateCoverLetter(params);
+  const content = await generateCoverLetter({
+    cvText: params.cvText,
+    jobDescription: params.jobDescription,
+    jobTitle: params.jobTitle ?? "",
+    companyName: params.companyName ?? "",
+  });
 
   return {
     content,
-    jobTitle: params.jobTitle,
-    companyName: params.companyName,
+    jobTitle: params.jobTitle ?? "",
+    companyName: params.companyName ?? "",
   };
 }

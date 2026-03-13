@@ -1,41 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exportToPDF, exportToDOCX } from "@/services/exportService";
-import { ExportRequest } from "@/types";
+import {
+  exportToPDF,
+  exportToDOCX,
+  exportCoverLetterToPDF,
+  exportCoverLetterToDOCX,
+} from "@/services/exportService";
 
 export async function POST(req: NextRequest) {
   try {
-    const body: ExportRequest = await req.json();
-    const { content, format, filename } = body;
+    const body = await req.json();
+    const { format, filename } = body;
 
-    if (!content || !format) {
-      return NextResponse.json(
-        { error: "Content and format are required" },
-        { status: 400 }
-      );
+    if (!format) {
+      return NextResponse.json({ error: "Format is required" }, { status: 400 });
     }
 
-    if (format === "pdf") {
-      const buffer = await exportToPDF(content);
-      return new NextResponse(buffer.buffer as ArrayBuffer, {
-        headers: {
-          "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${filename || "document"}.pdf"`,
-        },
-      });
+    let buffer: Buffer;
+
+    // Structured CV export
+    if (body.cv) {
+      buffer = format === "pdf"
+        ? await exportToPDF(body.cv)
+        : await exportToDOCX(body.cv);
+    }
+    // Plain text export (cover letter)
+    else if (body.content) {
+      buffer = format === "pdf"
+        ? await exportCoverLetterToPDF(body.content)
+        : await exportCoverLetterToDOCX(body.content);
+    }
+    else {
+      return NextResponse.json({ error: "cv or content is required" }, { status: 400 });
     }
 
-    if (format === "docx") {
-      const buffer = await exportToDOCX(content);
-      return new NextResponse(buffer.buffer as ArrayBuffer, {
-        headers: {
-          "Content-Type":
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "Content-Disposition": `attachment; filename="${filename || "document"}.docx"`,
-        },
-      });
-    }
+    const contentType =
+      format === "pdf"
+        ? "application/pdf"
+        : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-    return NextResponse.json({ error: "Unsupported format" }, { status: 400 });
+    return new NextResponse(buffer.buffer as ArrayBuffer, {
+      headers: {
+        "Content-Type": contentType,
+        "Content-Disposition": `attachment; filename="${filename || "document"}.${format}"`,
+      },
+    });
   } catch (error) {
     console.error("Error exporting document:", error);
     return NextResponse.json(
