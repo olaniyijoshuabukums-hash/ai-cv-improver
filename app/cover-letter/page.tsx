@@ -6,7 +6,6 @@ import CoverLetterPanel from "@/components/CoverLetterPanel";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { ParsedCV, CoverLetter } from "@/types";
 import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
@@ -34,12 +33,12 @@ export default function CoverLetterPage() {
 
       if (result.success && result.coverLetter) {
         setCoverLetter(result.coverLetter);
-        toast.success("Cover letter generated!");
+        toast.success("Your cover letter is ready!");
       } else {
-        toast.error(result.error || "Failed to generate cover letter");
+        toast.error(result.error || "Something went wrong — please try again");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to generate cover letter");
+      toast.error(err instanceof Error ? err.message : "Something went wrong — please try again");
     } finally {
       setIsGenerating(false);
     }
@@ -53,12 +52,27 @@ export default function CoverLetterPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
+
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Generate Cover Letter</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Upload your CV, paste the job description, and let AI write a
-          personalized cover letter for you.
+        <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 8 }}>
+          Cover Letter
+        </p>
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 36,
+            fontWeight: 800,
+            lineHeight: 1.1,
+            color: "var(--color-text-primary)",
+            margin: 0,
+          }}
+        >
+          Write Your Cover Letter
+        </h1>
+        <p style={{ fontSize: 16, color: "var(--color-text-secondary)", marginTop: 8, maxWidth: 560 }}>
+          Tell us about the role. We&rsquo;ll write a cover letter that sounds like you — clear,
+          confident, and tailored to the job.
         </p>
       </div>
 
@@ -68,15 +82,11 @@ export default function CoverLetterPage() {
         {/* ── Left panel ── */}
         <div className="w-full md:w-2/5 md:sticky md:top-[72px] md:max-h-[calc(100vh-88px)] md:overflow-y-auto space-y-4">
 
-          {/* Card: Upload + job details */}
           <div className="bg-white border border-border rounded-xl p-5 space-y-6">
 
-            {/* 1. Upload */}
+            {/* Upload */}
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700">
-                Step 1
-              </p>
-              <h2 className="text-sm font-semibold">Upload Your CV</h2>
+              <h2 className="text-sm font-semibold text-foreground">Your CV</h2>
               <CVUploader onUploadSuccess={setParsedCV} />
               {parsedCV && (
                 <p className="text-xs text-emerald-700 font-medium">
@@ -85,24 +95,20 @@ export default function CoverLetterPage() {
               )}
             </div>
 
-            {/* Divider */}
             <div className="border-t border-border" />
 
-            {/* 2. Job details */}
+            {/* Role details */}
             <div className="space-y-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700">
-                  Step 2
-                </p>
-                <h2 className="text-sm font-semibold mt-0.5">Enter Job Details</h2>
-              </div>
+              <h2 className="text-sm font-semibold text-foreground">
+                The Role You&rsquo;re Applying For
+              </h2>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="jobTitle" className="text-xs">Job Title</Label>
                   <Input
                     id="jobTitle"
-                    placeholder="e.g. Product Manager"
+                    placeholder="e.g. Product Designer"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
                   />
@@ -111,7 +117,7 @@ export default function CoverLetterPage() {
                   <Label htmlFor="companyName" className="text-xs">Company</Label>
                   <Input
                     id="companyName"
-                    placeholder="e.g. Acme Corp"
+                    placeholder="e.g. Stripe"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                   />
@@ -124,7 +130,7 @@ export default function CoverLetterPage() {
                 </Label>
                 <Textarea
                   id="jobDescription"
-                  placeholder="Paste the job description here — the AI will tailor your cover letter to this role..."
+                  placeholder="Paste the job description here — we'll tailor your CV specifically to this role..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   className="resize-none"
@@ -134,20 +140,31 @@ export default function CoverLetterPage() {
             </div>
           </div>
 
-          {/* 3. Action button */}
-          <Button
+          {/* CTA button */}
+          <button
             onClick={handleGenerate}
             disabled={!canSubmit}
-            className="w-full h-11 text-sm font-medium"
+            style={{
+              width: "100%",
+              padding: "14px",
+              fontSize: 16,
+              fontWeight: 600,
+              borderRadius: 10,
+              border: "none",
+              cursor: canSubmit ? "pointer" : "not-allowed",
+              background: canSubmit ? "var(--color-accent)" : "var(--color-border)",
+              color: canSubmit ? "#FFFFFF" : "var(--color-text-secondary)",
+              transition: "background 0.2s ease",
+            }}
           >
             {!parsedCV
-              ? "Upload CV first"
+              ? "Upload your CV first"
               : !jobDescription.trim()
               ? "Add a job description"
               : isGenerating
-              ? "Generating your cover letter…"
-              : "Generate Cover Letter"}
-          </Button>
+              ? "Crafting your cover letter..."
+              : "Write My Cover Letter"}
+          </button>
         </div>
 
         {/* ── Right panel ── */}
@@ -157,12 +174,14 @@ export default function CoverLetterPage() {
           {!isGenerating && !coverLetter && (
             <div className="flex flex-col items-center justify-center h-full min-h-[480px] text-center rounded-xl border-2 border-dashed border-border p-12">
               <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-4">
-                <FileText className="h-6 w-6 text-muted-foreground" />
+                <FileText className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} />
               </div>
-              <p className="text-sm font-medium text-foreground">Your cover letter will appear here</p>
-              <p className="text-xs text-muted-foreground mt-1.5 max-w-xs">
-                Upload your CV, add the job description, and click{" "}
-                <span className="font-medium">Generate Cover Letter</span> to get started
+              <p className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
+                Your cover letter will appear here
+              </p>
+              <p className="text-xs mt-1.5 max-w-xs" style={{ color: "var(--color-text-secondary)" }}>
+                Upload your CV and paste the job description — we&rsquo;ll write a cover letter
+                that sounds like you at your best.
               </p>
             </div>
           )}
@@ -171,7 +190,7 @@ export default function CoverLetterPage() {
           {isGenerating && (
             <div className="bg-white rounded-xl border border-border shadow-sm px-10 py-12 space-y-5">
               <p className="text-sm font-medium text-muted-foreground animate-pulse">
-                Writing your cover letter…
+                Crafting your cover letter...
               </p>
               <div className="space-y-3 animate-pulse">
                 <div className="h-3 bg-muted rounded w-full" />
@@ -191,11 +210,32 @@ export default function CoverLetterPage() {
 
           {/* Results */}
           {coverLetter && !isGenerating && (
-            <CoverLetterPanel
-              coverLetter={coverLetter}
-              onRegenerate={handleRegenerate}
-              isRegenerating={isGenerating}
-            />
+            <div>
+              {/* Result header */}
+              <div className="flex items-center gap-3 mb-4">
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.1em",
+                    background: "var(--color-accent-light)",
+                    color: "var(--color-accent)",
+                    padding: "4px 12px",
+                    borderRadius: 20,
+                  }}
+                >
+                  COVER LETTER READY
+                </span>
+                <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: 0 }}>
+                  Read through, make it yours, then download.
+                </p>
+              </div>
+              <CoverLetterPanel
+                coverLetter={coverLetter}
+                onRegenerate={handleRegenerate}
+                isRegenerating={isGenerating}
+              />
+            </div>
           )}
         </div>
       </div>

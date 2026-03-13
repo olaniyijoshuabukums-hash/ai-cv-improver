@@ -34,12 +34,12 @@ export default function ImprovePage() {
 
       if (result.success && result.improvedCV) {
         setImprovedCV(result.improvedCV);
-        toast.success("CV improved successfully!");
+        toast.success("Your CV is ready!");
       } else {
-        toast.error(result.error || "Failed to improve CV");
+        toast.error(result.error || "Something went wrong — please try again");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to improve CV");
+      toast.error(err instanceof Error ? err.message : "Something went wrong — please try again");
     } finally {
       setIsImproving(false);
     }
@@ -49,12 +49,27 @@ export default function ImprovePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
+
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Improve Your CV</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Upload your CV, add an optional job description to tailor the output,
-          then let AI rewrite your bullet points.
+        <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 8 }}>
+          CV Improvement
+        </p>
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 36,
+            fontWeight: 800,
+            lineHeight: 1.1,
+            color: "var(--color-text-primary)",
+            margin: 0,
+          }}
+        >
+          Strengthen Your CV
+        </h1>
+        <p style={{ fontSize: 16, color: "var(--color-text-secondary)", marginTop: 8, maxWidth: 560 }}>
+          Upload your CV and the job you&rsquo;re targeting. We&rsquo;ll rewrite your experience
+          to match what they&rsquo;re looking for — clearly and confidently.
         </p>
       </div>
 
@@ -64,15 +79,11 @@ export default function ImprovePage() {
         {/* ── Left panel ── */}
         <div className="w-full md:w-2/5 md:sticky md:top-[72px] md:max-h-[calc(100vh-88px)] md:overflow-y-auto space-y-4">
 
-          {/* Card: Upload + job details */}
           <div className="bg-white border border-border rounded-xl p-5 space-y-6">
 
-            {/* 1. Upload */}
+            {/* Upload */}
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700">
-                Step 1
-              </p>
-              <h2 className="text-sm font-semibold">Upload Your CV</h2>
+              <h2 className="text-sm font-semibold text-foreground">Your CV</h2>
               <CVUploader onUploadSuccess={setParsedCV} />
               {parsedCV && (
                 <p className="text-xs text-emerald-700 font-medium">
@@ -81,24 +92,21 @@ export default function ImprovePage() {
               )}
             </div>
 
-            {/* Divider */}
             <div className="border-t border-border" />
 
-            {/* 2. Job details (optional) */}
+            {/* Role details */}
             <div className="space-y-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700">
-                  Step 2 <span className="text-muted-foreground font-normal normal-case tracking-normal">— optional</span>
-                </p>
-                <h2 className="text-sm font-semibold mt-0.5">Tailor to a Role</h2>
-              </div>
+              <h2 className="text-sm font-semibold text-foreground">
+                The Role You&rsquo;re Targeting{" "}
+                <span className="text-muted-foreground font-normal">— optional</span>
+              </h2>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="jobTitle" className="text-xs">Job Title</Label>
                   <Input
                     id="jobTitle"
-                    placeholder="e.g. Product Manager"
+                    placeholder="e.g. Product Designer"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
                   />
@@ -107,7 +115,7 @@ export default function ImprovePage() {
                   <Label htmlFor="companyName" className="text-xs">Company</Label>
                   <Input
                     id="companyName"
-                    placeholder="e.g. Acme Corp"
+                    placeholder="e.g. Stripe"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                   />
@@ -118,7 +126,7 @@ export default function ImprovePage() {
                 <Label htmlFor="jobDescription" className="text-xs">Job Description</Label>
                 <Textarea
                   id="jobDescription"
-                  placeholder="Paste the job description here to tailor bullet points to this role..."
+                  placeholder="Paste the job description here — we'll tailor your CV specifically to this role..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   className="resize-none"
@@ -128,18 +136,29 @@ export default function ImprovePage() {
             </div>
           </div>
 
-          {/* 3. Action button */}
-          <Button
+          {/* CTA button */}
+          <button
             onClick={handleImprove}
             disabled={!canSubmit}
-            className="w-full h-11 text-sm font-medium"
+            style={{
+              width: "100%",
+              padding: "14px",
+              fontSize: 16,
+              fontWeight: 600,
+              borderRadius: 10,
+              border: "none",
+              cursor: canSubmit ? "pointer" : "not-allowed",
+              background: canSubmit ? "var(--color-accent)" : "var(--color-border)",
+              color: canSubmit ? "#FFFFFF" : "var(--color-text-secondary)",
+              transition: "background 0.2s ease",
+            }}
           >
             {!parsedCV
-              ? "Upload CV first"
+              ? "Upload your CV first"
               : isImproving
-              ? "Improving your CV…"
-              : "Improve My CV"}
-          </Button>
+              ? "Reading your experience..."
+              : "Strengthen My CV"}
+          </button>
         </div>
 
         {/* ── Right panel ── */}
@@ -149,11 +168,14 @@ export default function ImprovePage() {
           {!isImproving && !improvedCV && (
             <div className="flex flex-col items-center justify-center h-full min-h-[480px] text-center rounded-xl border-2 border-dashed border-border p-12">
               <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-4">
-                <FileText className="h-6 w-6 text-muted-foreground" />
+                <FileText className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} />
               </div>
-              <p className="text-sm font-medium text-foreground">Your improved CV will appear here</p>
-              <p className="text-xs text-muted-foreground mt-1.5 max-w-xs">
-                Upload your CV and click <span className="font-medium">Improve My CV</span> to get started
+              <p className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
+                Your strengthened CV will appear here
+              </p>
+              <p className="text-xs mt-1.5 max-w-xs" style={{ color: "var(--color-text-secondary)" }}>
+                Fill in the details on the left and click{" "}
+                <span className="font-medium">Strengthen My CV</span> to get started.
               </p>
             </div>
           )}
@@ -162,7 +184,7 @@ export default function ImprovePage() {
           {isImproving && (
             <div className="bg-white rounded-xl border border-border shadow-sm px-10 py-12 space-y-5">
               <p className="text-sm font-medium text-muted-foreground animate-pulse">
-                Analysing your CV with AI…
+                Reading your experience...
               </p>
               <div className="space-y-3 animate-pulse">
                 <div className="h-5 bg-muted rounded w-1/3" />
@@ -182,7 +204,28 @@ export default function ImprovePage() {
 
           {/* Results */}
           {improvedCV && !isImproving && (
-            <CVImprovementPanel improvedCV={improvedCV} />
+            <div>
+              {/* Result header */}
+              <div className="flex items-center gap-3 mb-4">
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.1em",
+                    background: "var(--color-accent-light)",
+                    color: "var(--color-accent)",
+                    padding: "4px 12px",
+                    borderRadius: 20,
+                  }}
+                >
+                  CV READY
+                </span>
+                <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: 0 }}>
+                  Review your improved CV below. Edit any section, then download.
+                </p>
+              </div>
+              <CVImprovementPanel improvedCV={improvedCV} />
+            </div>
           )}
         </div>
       </div>

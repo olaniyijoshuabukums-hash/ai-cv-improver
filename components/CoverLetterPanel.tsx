@@ -132,7 +132,7 @@ export default function CoverLetterPanel({
             className="gap-2 ml-auto"
           >
             <RefreshCw className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
-            {isRegenerating ? "Regenerating…" : "Regenerate"}
+            {isRegenerating ? "Rewriting..." : "Rewrite"}
           </Button>
         )}
       </div>

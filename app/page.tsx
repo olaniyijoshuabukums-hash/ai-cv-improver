@@ -88,8 +88,8 @@ export default function Home() {
               </h1>
 
               <p style={{ fontSize: 16, color: "var(--color-text-secondary)", lineHeight: 1.6, marginTop: 24, maxWidth: 420 }}>
-                Upload your CV, paste a job description, and get rewritten bullet
-                points and a personalized cover letter in seconds.
+                Paste your CV and the role you want. We&rsquo;ll sharpen your bullets,
+                fix your story, and write a cover letter that sounds like you.
               </p>
 
               {/* CTAs */}
@@ -300,9 +300,9 @@ export default function Home() {
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", alignItems: "center" }}
           >
             {[
-              { stat: "2 min", label: "Average time to improve a CV", last: false },
-              { stat: "94%",   label: "of users said their CV looked more professional", last: false },
-              { stat: "3×",   label: "more interviews reported after using CVBoost", last: true },
+              { stat: "2 min", label: "to improve a full CV", last: false },
+              { stat: "94%",   label: "said their CV looked more professional", last: false },
+              { stat: "3×",   label: "more interviews after strengthening their CV", last: true },
             ].map(({ stat, label, last }) => (
               <div
                 key={stat}
