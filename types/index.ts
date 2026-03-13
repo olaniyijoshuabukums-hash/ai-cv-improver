@@ -86,6 +86,25 @@ export interface GenerateCoverLetterResponse {
   error?: string;
 }
 
+export interface JobMatchScore {
+  score: number;
+  label: "Weak Match" | "Fair Match" | "Good Match" | "Strong Match";
+  strengths: string[];
+  gaps: string[];
+  tip: string;
+}
+
+export interface JobMatchRequest {
+  cvText: string;
+  jobDescription: string;
+}
+
+export interface JobMatchResponse {
+  success: boolean;
+  jobMatch?: JobMatchScore;
+  error?: string;
+}
+
 // Used by cover letter export (plain text content)
 export interface ExportRequest {
   content: string;

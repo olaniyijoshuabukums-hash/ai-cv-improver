@@ -3,11 +3,11 @@
 import { useState } from "react";
 import CVUploader from "@/components/CVUploader";
 import CVImprovementPanel from "@/components/CVImprovementPanel";
+import { JobMatchScoreCard, JobMatchScoreCardSkeleton } from "@/components/JobMatchScoreCard";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { ParsedCV, ImprovedCV } from "@/types";
+import { ParsedCV, ImprovedCV, JobMatchScore } from "@/types";
 import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { FileText } from "lucide-react";
@@ -15,7 +15,9 @@ import { FileText } from "lucide-react";
 export default function ImprovePage() {
   const [parsedCV, setParsedCV] = useState<ParsedCV | null>(null);
   const [improvedCV, setImprovedCV] = useState<ImprovedCV | null>(null);
+  const [jobMatch, setJobMatch] = useState<JobMatchScore | null>(null);
   const [isImproving, setIsImproving] = useState(false);
+  const [isScoringMatch, setIsScoringMatch] = useState(false);
   const [jobTitle, setJobTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [jobDescription, setJobDescription] = useState("");
@@ -23,6 +25,8 @@ export default function ImprovePage() {
   async function handleImprove() {
     if (!parsedCV) return;
     setIsImproving(true);
+    setImprovedCV(null);
+    setJobMatch(null);
 
     try {
       const result = await apiClient.improveCV({
@@ -35,6 +39,18 @@ export default function ImprovePage() {
       if (result.success && result.improvedCV) {
         setImprovedCV(result.improvedCV);
         toast.success("Your CV is ready!");
+
+        // Fire job match scoring in parallel if a job description was provided
+        if (jobDescription.trim()) {
+          setIsScoringMatch(true);
+          apiClient
+            .jobMatch({ cvText: parsedCV.rawText, jobDescription: jobDescription.trim() })
+            .then((r) => {
+              if (r.success && r.jobMatch) setJobMatch(r.jobMatch);
+            })
+            .catch(() => { /* non-critical — silently skip */ })
+            .finally(() => setIsScoringMatch(false));
+        }
       } else {
         toast.error(result.error || "Something went wrong — please try again");
       }
@@ -224,6 +240,11 @@ export default function ImprovePage() {
                   Review your improved CV below. Edit any section, then download.
                 </p>
               </div>
+
+              {/* Job Match Score card — only shown when a job description was provided */}
+              {isScoringMatch && <JobMatchScoreCardSkeleton />}
+              {jobMatch && !isScoringMatch && <JobMatchScoreCard data={jobMatch} />}
+
               <CVImprovementPanel improvedCV={improvedCV} />
             </div>
           )}

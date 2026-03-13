@@ -126,14 +126,21 @@ export default function CVImprovementPanel({ improvedCV }: CVImprovementPanelPro
                       </span>
                     )}
                   </div>
-                  <ul className="mt-2 space-y-1.5">
+                  <ul className="mt-2" style={{ listStyle: "none", padding: 0, margin: 0 }}>
                     {job.bullets.map((bullet, j) => (
                       <li
                         key={j}
-                        className="flex gap-2.5 text-sm text-gray-700 leading-relaxed"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                          color: "var(--color-text-primary)",
+                          paddingLeft: 16,
+                          textIndent: -16,
+                          marginBottom: 6,
+                        }}
                       >
-                        <span className="text-emerald-600 shrink-0 mt-px select-none">•</span>
-                        <span>{bullet}</span>
+                        <span style={{ color: "var(--color-accent)", userSelect: "none" }}>• </span>
+                        {bullet}
                       </li>
                     ))}
                   </ul>
@@ -147,11 +154,18 @@ export default function CVImprovementPanel({ improvedCV }: CVImprovementPanelPro
         {improvedCV.skills.length > 0 && (
           <section className="mb-7">
             <SectionHeading>Skills</SectionHeading>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3" style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {improvedCV.skills.map((skill, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+                  style={{
+                    background: "var(--color-accent-light)",
+                    color: "var(--color-accent)",
+                    borderRadius: 20,
+                    padding: "3px 10px",
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }}
                 >
                   {skill}
                 </span>

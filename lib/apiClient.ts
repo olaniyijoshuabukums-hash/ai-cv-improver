@@ -5,6 +5,8 @@ import {
   ImprovedCV,
   GenerateCoverLetterRequest,
   GenerateCoverLetterResponse,
+  JobMatchRequest,
+  JobMatchResponse,
   ParsedCV,
   ExportRequest,
 } from "@/types";
@@ -50,6 +52,16 @@ export const apiClient = {
     });
 
     return handleResponse<GenerateCoverLetterResponse>(res);
+  },
+
+  async jobMatch(data: JobMatchRequest): Promise<JobMatchResponse> {
+    const res = await fetch("/api/job-match", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    return handleResponse<JobMatchResponse>(res);
   },
 
   // Structured CV export
